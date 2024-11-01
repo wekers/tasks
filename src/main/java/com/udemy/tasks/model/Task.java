@@ -25,6 +25,9 @@ public class Task {
                 .build();
     }
 
+    public String getId() {
+        return id;
+    }
 
     public String getTitle() {
         return title;
@@ -57,6 +60,7 @@ public class Task {
     }
 
     public static class Builder {
+        private String id;
         private String title;
         private String description;
         private int priority;
@@ -72,6 +76,11 @@ public class Task {
             this.state = task.state;
         }
 
+        public Builder withId(String id){
+            this.id = id;
+            return this;
+
+        }
 
         public Builder withTitle(String title) {
             this.title = title;
