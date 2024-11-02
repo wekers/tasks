@@ -5,8 +5,6 @@ import com.udemy.tasks.model.Task;
 import com.udemy.tasks.model.TaskState;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -48,10 +46,5 @@ public class TaskDTOConverter {
                 .build();
     }
 
-    public List<TaskDTO> convertList(List<Task> taskList){
-        return Optional.ofNullable(taskList)
-                .map(array -> array.stream().map(this::convert).toList())
-                .orElse(new ArrayList<>());
-    }
 
 }
