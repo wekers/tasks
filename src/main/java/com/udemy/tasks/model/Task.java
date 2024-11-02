@@ -1,6 +1,5 @@
 package com.udemy.tasks.model;
 
-import com.udemy.tasks.service.TaskService;
 import org.springframework.data.annotation.Id;
 
 public class Task {
@@ -13,6 +12,7 @@ public class Task {
     private TaskState state;
 
     public Task(Builder builder) {
+        this.id = builder.id;
         this.title = builder.title;
         this.description = builder.description;
         this.priority = builder.priority;
