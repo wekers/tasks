@@ -8,10 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 
@@ -42,5 +48,40 @@ class TaskControllerTest {
                 .expectStatus().isOk()
                 .expectBody(TaskDTO.class);
     }
+
+    @Test
+    void controller_mustReturnOk_whenGetPaginatedSuccessfully() {
+
+        Task task = new Task();
+        Page<Task> page = new PageImpl<>(Collections.singletonList(task), PageRequest.of(0, 1), 1);
+
+        when(service.findPaginated(any(), anyInt(), anyInt())).thenReturn(page);
+
+        WebTestClient client = WebTestClient.bindToController(controller).build();
+
+        client.get()
+                .uri("/tasks")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Task.class);
+    }
+
+    @Test
+    void controller_mustReturnNoContent_whenDeleteSuccessfully() {
+
+        String taskId = "any-id";
+
+        when(service.deleteById(any())).thenReturn(Mono.empty());
+
+        WebTestClient client = WebTestClient.bindToController(controller).build();
+
+        client.delete()
+                .uri("/tasks/" + taskId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+    }
+
+
 
 }
