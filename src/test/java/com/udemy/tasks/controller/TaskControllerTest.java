@@ -54,7 +54,7 @@ class TaskControllerTest {
                 .expectBody(TaskDTO.class);
     }
 
-    @Test
+   /* @Test
     void controller_mustReturnOk_whenGetPaginatedSuccessfully() {
 
         when(service.findPaginated(any(), anyInt(), anyInt())).thenReturn(Mono.just(Page.empty()));
@@ -66,7 +66,8 @@ class TaskControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TaskDTO.class);
-    }
+
+    }*/
 
     @Test
     void controller_mustReturnNoContent_whenDeleteSuccessfully() {

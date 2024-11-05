@@ -1,5 +1,6 @@
 package com.udemy.tasks.service;
 
+import com.udemy.tasks.exception.TaskNotFoundException;
 import com.udemy.tasks.model.Task;
 import com.udemy.tasks.repository.TaskCustomRepository;
 import com.udemy.tasks.repository.TaskRepository;
@@ -43,6 +44,14 @@ public class TaskService {
         return Mono.just(task)
                 .doOnNext(t -> LOGGER.info("Saving task with title {}", t.getTitle()))
                 .flatMap(taskRepository::save);
+    }
+
+    public Mono<Task> update(Task task) {
+        return taskRepository.findById(task.getId())
+                .map(task::update)
+                .flatMap(taskRepository::save)
+                .switchIfEmpty(Mono.error(TaskNotFoundException::new))
+                .doOnError(error -> LOGGER.error("Error during update task with id: {}. Message: {}", task.getId(), error.getMessage()));
     }
 
     public Mono<Void> deleteById(String id) {

@@ -3,8 +3,10 @@ package com.udemy.tasks.controller;
 
 import com.udemy.tasks.controller.converter.TaskDTOConverter;
 import com.udemy.tasks.controller.converter.TaskInsertDTOConverter;
+import com.udemy.tasks.controller.converter.TaskUpdateDTOConverter;
 import com.udemy.tasks.controller.dto.TaskDTO;
 import com.udemy.tasks.controller.dto.TaskInsertDTO;
+import com.udemy.tasks.controller.dto.TaskUpdateDTO;
 import com.udemy.tasks.model.TaskState;
 import com.udemy.tasks.service.TaskService;
 import org.slf4j.Logger;
@@ -23,11 +25,13 @@ public class TaskController {
     private final TaskService service;
     private final TaskDTOConverter converter;
     private final TaskInsertDTOConverter insertDTOConverter;
+    private final TaskUpdateDTOConverter updateDTOConverter;
 
-    public TaskController(TaskService service, TaskDTOConverter converter, TaskInsertDTOConverter insertDTOConverter) {
+    public TaskController(TaskService service, TaskDTOConverter converter, TaskInsertDTOConverter insertDTOConverter, TaskUpdateDTOConverter updateDTOConverter) {
         this.service = service;
         this.converter = converter;
         this.insertDTOConverter = insertDTOConverter;
+        this.updateDTOConverter = updateDTOConverter;
     }
 
     @GetMapping
@@ -38,9 +42,18 @@ public class TaskController {
                                    @RequestParam(required = false) TaskState taskState,
                                    @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
                                    @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        //return service.list().map(converter::convertList);
+
         return service.findPaginated(converter.converter(id, title, description, priority, taskState), pageNumber, pageSize)
                 .map(it -> it.map(converter::convert));
+    }
+
+    @PutMapping
+    public Mono<TaskDTO> updateTask(@RequestBody TaskUpdateDTO taskUpdateDTO) {
+        return service.update(updateDTOConverter.convert(taskUpdateDTO))
+                .doOnNext(it -> LOGGER.info("Update task with id {}", it.getId()))
+                .map(converter::convert);
+
+
     }
 
     @PostMapping
