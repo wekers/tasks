@@ -1,7 +1,9 @@
 package com.udemy.tasks.controller;
 
 import com.udemy.tasks.controller.converter.TaskDTOConverter;
+import com.udemy.tasks.controller.converter.TaskInsertDTOConverter;
 import com.udemy.tasks.controller.dto.TaskDTO;
+import com.udemy.tasks.controller.dto.TaskInsertDTO;
 import com.udemy.tasks.model.Task;
 import com.udemy.tasks.service.TaskService;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,9 @@ class TaskControllerTest {
     @Mock
     private TaskDTOConverter converter;
 
+    @Mock
+    private TaskInsertDTOConverter insertDTOConverter;
+
     @Test
     void controller_mustReturnOk_whenSaveSuccessfully() {
 
@@ -43,7 +48,7 @@ class TaskControllerTest {
         WebTestClient client = WebTestClient.bindToController(controller).build();
 
         client.post().uri("/tasks")
-                .bodyValue(new TaskDTO())
+                .bodyValue(new TaskInsertDTO())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(TaskDTO.class);
