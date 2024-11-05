@@ -35,18 +35,18 @@ public class TaskService {
 
 
 
-    public Page<Task> findPaginated(Task task, Integer pageNumber, Integer Pagesize) {
+    public Mono<Page<Task>> findPaginated(Task task, Integer pageNumber, Integer Pagesize) {
         return taskCustomRepository.findPaginated(task, pageNumber, Pagesize);
     }
 
     private Mono<Task> save(Task task){
         return Mono.just(task)
                 .doOnNext(t -> LOGGER.info("Saving task with title {}", t.getTitle()))
-                .map(taskRepository::save);
+                .flatMap(taskRepository::save);
     }
 
     public Mono<Void> deleteById(String id) {
-        return Mono.fromRunnable(() -> taskRepository.deleteById(id));
+        return taskRepository.deleteById(id);
 
     }
 }

@@ -57,10 +57,7 @@ class TaskControllerTest {
     @Test
     void controller_mustReturnOk_whenGetPaginatedSuccessfully() {
 
-        Task task = new Task();
-        Page<Task> page = new PageImpl<>(Collections.singletonList(task), PageRequest.of(0, 1), 1);
-
-        when(service.findPaginated(any(), anyInt(), anyInt())).thenReturn(page);
+        when(service.findPaginated(any(), anyInt(), anyInt())).thenReturn(Mono.just(Page.empty()));
 
         WebTestClient client = WebTestClient.bindToController(controller).build();
 
@@ -68,7 +65,7 @@ class TaskControllerTest {
                 .uri("/tasks")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(Task.class);
+                .expectBody(TaskDTO.class);
     }
 
     @Test
