@@ -6,18 +6,18 @@ import jakarta.validation.constraints.Size;
 
 public class TaskUpdateDTO {
 
-    @NotBlank(message = "Valor inválido para campo ID")
+    @NotBlank(message = "{blank.id}")
     private String id;
 
-    @NotBlank(message = "Valor não pode ser em branco para o campo Title")
-    @Size(min = 3, max = 20, message = "O titulo deve ter entre 3 a 20 caracteres")
+    @NotBlank(message = "{blank.title}")
+    @Size(min = 3, max = 20, message = "{size.title}")
     private String title;
 
-    @NotBlank(message = "Valor não pode ser em branco para o campo Description")
-    @Size(min = 10, max = 50, message = "O titulo deve ter entre 10 a 50 caracteres")
+    @NotBlank(message = "{blank.description}")
+    @Size(min = 10, max = 50, message = "{size.description}")
     private String description;
 
-    @Min(value = 1, message = "A prioridade deve ser maior que zero")
+    @Min(value = 1, message = "{min.priority}")
     private int priority;
 
     public String getId() {

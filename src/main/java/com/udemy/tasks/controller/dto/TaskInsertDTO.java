@@ -6,27 +6,32 @@ import jakarta.validation.constraints.Size;
 
 public class TaskInsertDTO {
 
+    @NotBlank(message = "{blank.title}")
+    @Size(min = 3, max = 20, message = "{size.title")
     private String title;
+
+    @NotBlank(message = "{blank.description}")
+    @Size(min = 10, max = 50, message = "{size.description}")
     private String description;
+
+    @Min(value = 1, message = "{min.priority}")
     private int priority;
 
     public String getTitle() {
         return title;
     }
 
-    @NotBlank(message = "Valor não pode ser em branco para o campo Title")
-    @Size(min = 3, max = 20, message = "O titulo deve ter entre 3 a 20 caracteres")
+
     public void setTitle(String title) {
         this.title = title;
     }
 
-    @NotBlank(message = "Valor não pode ser em branco para o campo Description")
-    @Size(min = 10, max = 50, message = "O titulo deve ter entre 10 a 50 caracteres")
+
     public String getDescription() {
         return description;
     }
 
-    @Min(value = 1, message = "A prioridade deve ser maior que zero")
+
     public void setDescription(String description) {
         this.description = description;
     }
