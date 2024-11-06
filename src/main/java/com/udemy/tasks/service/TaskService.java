@@ -1,6 +1,7 @@
 package com.udemy.tasks.service;
 
 import com.udemy.tasks.exception.TaskNotFoundException;
+import com.udemy.tasks.model.Address;
 import com.udemy.tasks.model.Task;
 import com.udemy.tasks.repository.TaskCustomRepository;
 import com.udemy.tasks.repository.TaskRepository;
@@ -16,14 +17,17 @@ public class TaskService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
 
-    private final TaskRepository taskRepository;
+    private final TaskRepository repository;
 
     private final TaskCustomRepository taskCustomRepository;
 
+    private final AddressService addressService;
+
     public TaskService(TaskRepository taskRepository,
-                       TaskCustomRepository taskCustomRepository) {
-        this.taskRepository = taskRepository;
+                       TaskCustomRepository taskCustomRepository, AddressService addressService) {
+        this.repository = taskRepository;
         this.taskCustomRepository = taskCustomRepository;
+        this.addressService = addressService;
     }
 
 
@@ -43,19 +47,35 @@ public class TaskService {
     private Mono<Task> save(Task task){
         return Mono.just(task)
                 .doOnNext(t -> LOGGER.info("Saving task with title {}", t.getTitle()))
-                .flatMap(taskRepository::save);
+                .flatMap(repository::save);
     }
 
     public Mono<Task> update(Task task) {
-        return taskRepository.findById(task.getId())
+        return repository.findById(task.getId())
                 .map(task::update)
-                .flatMap(taskRepository::save)
+                .flatMap(repository::save)
                 .switchIfEmpty(Mono.error(TaskNotFoundException::new))
                 .doOnError(error -> LOGGER.error("Error during update task with id: {}. Message: {}", task.getId(), error.getMessage()));
     }
 
     public Mono<Void> deleteById(String id) {
-        return taskRepository.deleteById(id);
+        return repository.deleteById(id);
 
     }
+
+    public Mono<Task> updateAddress(Task task, Address address) {
+        return Mono.just(task)
+                .map(it -> task.updateAddress(address));
+    }
+
+    public Mono<Task> start(String id, String zipcode) {
+        return repository.findById(id)
+                .zipWhen(it -> addressService.getAddress(zipcode))
+                .flatMap(it -> updateAddress(it.getT1(), it.getT2()))
+                .map(Task::start)
+                .flatMap(repository::save)
+                .switchIfEmpty(Mono.error(TaskNotFoundException::new))
+                .doOnError(error -> LOGGER.error("Error on start task. ID: {}", id, error));
+    }
 }
+
