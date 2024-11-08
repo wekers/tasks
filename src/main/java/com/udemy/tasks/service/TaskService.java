@@ -1,6 +1,7 @@
 package com.udemy.tasks.service;
 
 import com.udemy.tasks.exception.TaskNotFoundException;
+import com.udemy.tasks.messaging.TaskNotificationProducer;
 import com.udemy.tasks.model.Address;
 import com.udemy.tasks.model.Task;
 import com.udemy.tasks.repository.TaskCustomRepository;
@@ -23,11 +24,14 @@ public class TaskService {
 
     private final AddressService addressService;
 
+    private final TaskNotificationProducer producer;
+
     public TaskService(TaskRepository taskRepository,
-                       TaskCustomRepository taskCustomRepository, AddressService addressService) {
+                       TaskCustomRepository taskCustomRepository, AddressService addressService, TaskNotificationProducer producer) {
         this.repository = taskRepository;
         this.taskCustomRepository = taskCustomRepository;
         this.addressService = addressService;
+        this.producer = producer;
     }
 
 
@@ -74,6 +78,7 @@ public class TaskService {
                 .flatMap(it -> updateAddress(it.getT1(), it.getT2()))
                 .map(Task::start)
                 .flatMap(repository::save)
+                .flatMap(producer::sendNotification)
                 .switchIfEmpty(Mono.error(TaskNotFoundException::new))
                 .doOnError(error -> LOGGER.error("Error on start task. ID: {}", id, error));
     }
