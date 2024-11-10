@@ -13,10 +13,15 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
+@EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
@@ -44,7 +49,7 @@ public class TaskController {
                                    @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
                                    @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
 
-        return service.findPaginated(converter.converter(id, title, description, priority, taskState), pageNumber, pageSize)
+        return service.findPaginated(converter.convert(id, title, description, priority, taskState), pageNumber, pageSize)
                 .map(it -> it.map(converter::convert));
     }
 
@@ -77,5 +82,17 @@ public class TaskController {
     public Mono<TaskDTO> start(@RequestParam String id, @RequestParam String zipcode){
         return service.start(id, zipcode)
                 .map(converter::convert);
+    }
+
+    @PostMapping("/refresh/created")
+    public Flux<TaskDTO> refreshCreated(){
+        return service.refreshCreated()
+                .map(converter::convert);
+    }
+
+    @PostMapping("/done")
+    public Mono<List<TaskDTO>> done(@RequestBody List<String> ids){
+        return service.doneMany(ids)
+                .map(converter::convertList);
     }
 }
