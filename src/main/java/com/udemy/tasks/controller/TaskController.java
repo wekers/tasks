@@ -41,17 +41,24 @@ public class TaskController {
     }
 
     @GetMapping
-    public Mono<Page<TaskDTO>> getTasks(@RequestParam(required = false) String id,
-                                   @RequestParam(required = false) String title,
-                                   @RequestParam(required = false) String description,
-                                   @RequestParam(required = false, defaultValue = "0") int priority,
-                                   @RequestParam(required = false) TaskState taskState,
-                                   @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
-                                   @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-
-        return service.findPaginated(converter.convert(id, title, description, priority, taskState), pageNumber, pageSize)
-                .map(it -> it.map(converter::convert));
+    public Flux<TaskDTO> getTasks() {
+        return service.list()
+                .map(converter::convert)
+                .doFinally(it -> LOGGER.info("Tasks listed"));
     }
+
+    @GetMapping("/paginated")
+    public Page<TaskDTO> findPaginated(@RequestParam(required = false) String id,
+                                       @RequestParam(required = false) String title,
+                                       @RequestParam(required = false) String description,
+                                       @RequestParam(required = false, defaultValue = "0") int priority,
+                                       @RequestParam(required = false) TaskState taskState,
+                                       @RequestParam(value = "pageNumber", defaultValue = "0") Integer pageNumber,
+                                       @RequestParam(value = "pageSize", defaultValue = "20") Integer pageSize) {
+        return service.findPaginated(converter.convert(id, title, description, priority, taskState), pageNumber, pageSize)
+                .map(converter::convert);
+    }
+
 
     @PutMapping
     public Mono<TaskDTO> updateTask(@RequestBody @Valid TaskUpdateDTO taskUpdateDTO) {
