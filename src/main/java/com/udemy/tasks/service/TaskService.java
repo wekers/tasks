@@ -45,11 +45,18 @@ public class TaskService {
                 .doOnError(error -> LOGGER.error("Error during save task. Title: {}", task.getTitle(), error));
     }
 
-
-
-    public Mono<Page<Task>> findPaginated(Task task, Integer pageNumber, Integer Pagesize) {
-        return taskCustomRepository.findPaginated(task, pageNumber, Pagesize);
+    public Flux<Task> list() {
+        return repository.findAll();
     }
+
+
+
+
+    public Page<Task> findPaginated(Task task, Integer pageNumber, Integer pageSize) {
+        return taskCustomRepository.findPaginated(task, pageNumber, pageSize)
+                .block();
+    }
+
 
     private Mono<Task> save(Task task){
         return Mono.just(task)
