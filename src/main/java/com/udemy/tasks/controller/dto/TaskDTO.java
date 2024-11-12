@@ -1,10 +1,12 @@
 package com.udemy.tasks.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.udemy.tasks.model.Address;
 import com.udemy.tasks.model.TaskState;
 
 import java.time.LocalDate;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TaskDTO {
 
     private String id;
