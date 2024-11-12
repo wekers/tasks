@@ -1,9 +1,12 @@
 package com.udemy.tasks.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
+/* Note, that this annotation is the Mongo equivalent of @Entity in JPA.*/
+@Document(collection = "task")
 public class Task {
 
     @Id
