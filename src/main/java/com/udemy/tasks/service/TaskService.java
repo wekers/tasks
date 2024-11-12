@@ -6,6 +6,7 @@ import com.udemy.tasks.model.Address;
 import com.udemy.tasks.model.Task;
 import com.udemy.tasks.repository.TaskCustomRepository;
 import com.udemy.tasks.repository.TaskRepository;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -82,6 +85,25 @@ public class TaskService {
     public Mono<Task> updateAddress(Task task, Address address) {
         return Mono.just(task)
                 .map(it -> task.updateAddress(address));
+    }
+
+    @PostConstruct
+    private void scheduleDoneOlderTasks(){
+        Mono.delay(Duration.ofSeconds(5))
+                .doOnNext(it -> LOGGER.info("Starting task monitoring"))
+                .subscribe();
+
+        //Flux.interval(Duration.ofSeconds(10))
+        Flux.interval(Duration.ofDays(1))
+                .flatMap(it -> doneOlderTasks())
+                .filter(tasks -> tasks > 0)
+                .doOnNext(tasks -> LOGGER.info("{} task(s) completed after being active for over 7 days.", tasks))
+                .subscribe();
+    }
+
+    private Mono<Long> doneOlderTasks(){
+        return taskCustomRepository.updateStateToDoneForOlderTasks(LocalDate.now().minusDays(7));
+
     }
 
     public Mono<Task> start(String id, String zipcode) {

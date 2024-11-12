@@ -1,14 +1,19 @@
 package com.udemy.tasks.repository;
 
+import com.mongodb.client.result.UpdateResult;
 import com.udemy.tasks.model.Task;
+import com.udemy.tasks.model.TaskState;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -16,9 +21,12 @@ public class TaskCustomRepository {
 
     private final ReactiveMongoOperations mongoOperations;
 
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
 
-    public TaskCustomRepository(ReactiveMongoOperations mongoOperations) {
+
+    public TaskCustomRepository(ReactiveMongoOperations mongoOperations, ReactiveMongoTemplate reactiveMongoTemplate) {
         this.mongoOperations = mongoOperations;
+        this.reactiveMongoTemplate = reactiveMongoTemplate;
     }
 
 
@@ -30,6 +38,15 @@ public class TaskCustomRepository {
         return queryExample(task)
                 .zipWith(pageable(page, size))
                 .flatMap(it -> execute(task, it.getT1(), it.getT2()));
+
+    }
+
+    public Mono<Long> updateStateToDoneForOlderTasks(LocalDate date){
+        return reactiveMongoTemplate.updateMulti(
+                Query.query(Criteria.where("created").lte(date).and("state").is(TaskState.DOING)), //lte = less than equals
+                Update.update("state", TaskState.DONE),
+                Task.class
+        ).map(UpdateResult::getModifiedCount);
 
     }
 
